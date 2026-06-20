@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Stile di sistema pulito a configurazione fissa -->
+    <style name="Theme.WebInspector" parent="android:Theme.DeviceDefault.NoActionBar">
+        <!-- Lasciare vuoto. Jetpack Compose sovrascriverà tutto via codice Kotlin -->
+    </style>
+</resources>
