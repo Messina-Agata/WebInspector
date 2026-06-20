@@ -1,0 +1,1 @@
+WebInspector is an app which allows developers and tech enthusiasts to analyze the DOM, inspect console logs, and monitor network traffic of any URL directly from their mobile devices, mimicking desktop browser Developer Tools. Compatible with Android 7.0 (Nougat) and above.
