@@ -40,7 +40,7 @@
 
     - **Headers**: View and copy request/response headers.
 
-      <img width="348" height="754" alt="image" src="https://github.com/user-attachments/assets/8f680466-dff8-4737-aa7f-488633f61d5d" />
+      <img width="348" height="754" alt="7" src="https://github.com/user-attachments/assets/91f0c985-a8c7-45e3-9ead-bc4488b744ac" />
 
     - **Payload**: Inspect query parameters and POST bodies.
 
