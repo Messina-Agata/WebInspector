@@ -575,7 +575,7 @@ fun MainScreen(navController: NavController, viewModel: InspectorViewModel) {
                                 }
                         }
                     )
-                    Text("Version: v1.0.0")
+                    Text("Version: v1.0.1")
                     val contact = buildAnnotatedString {
                         append("For requests or issues, please open an issue on the ")
                         pushStringAnnotation(tag = "URL", annotation = "https://github.com/Messina-Agata/WebInspector/issues")
@@ -988,8 +988,10 @@ fun NetworkDetailScreen(
             OutlinedTextField(
                 value = req.url,
                 onValueChange = {},
+                readOnly = true,
                 enabled = true,
                 modifier = Modifier.fillMaxWidth(),
+                maxLines = 4,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
