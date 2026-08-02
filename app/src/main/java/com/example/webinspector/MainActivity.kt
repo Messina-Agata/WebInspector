@@ -163,7 +163,7 @@ fun BackgroundWebView(url: String, viewModel: InspectorViewModel) {
                 settings.domStorageEnabled = true
                 settings.databaseEnabled = true
                 settings.textZoom = 100
-                settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                settings.userAgentString = null
                 settings.mediaPlaybackRequiresUserGesture = false
 
                 val bridge = WebInspectorBridge(
@@ -575,7 +575,7 @@ fun MainScreen(navController: NavController, viewModel: InspectorViewModel) {
                                 }
                         }
                     )
-                    Text("Version: v1.0.1")
+                    Text("Version: v1.0.2")
                     val contact = buildAnnotatedString {
                         append("For requests or issues, please open an issue on the ")
                         pushStringAnnotation(tag = "URL", annotation = "https://github.com/Messina-Agata/WebInspector/issues")
