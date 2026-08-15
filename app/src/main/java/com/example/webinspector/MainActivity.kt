@@ -48,6 +48,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.text.TextLayoutResult
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -575,7 +580,7 @@ fun MainScreen(navController: NavController, viewModel: InspectorViewModel) {
                                 }
                         }
                     )
-                    Text("Version: v1.0.2")
+                    Text("Version: v1.0.3")
                     val contact = buildAnnotatedString {
                         append("For requests or issues, please open an issue on the ")
                         pushStringAnnotation(tag = "URL", annotation = "https://github.com/Messina-Agata/WebInspector/issues")
@@ -1018,6 +1023,49 @@ fun RequestDataScreen(
     showSearch: Boolean = false,
 ) {
     var search by remember { mutableStateOf("") }
+    var currentSearchIndex by remember { mutableStateOf(0) }
+    val scrollState = rememberScrollState()
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+
+    val matches = if (search.isNotBlank()) {
+        var matchCount = 0
+        var startIndex = 0
+        while (true) {
+            val index = content.indexOf(search, startIndex, ignoreCase = true)
+            if (index == -1) break
+            matchCount++
+            startIndex = index + 1
+        }
+        matchCount
+    } else {
+        0
+    }
+
+    LaunchedEffect(currentSearchIndex, search, textLayoutResult) {
+        if (search.isNotBlank() && textLayoutResult != null) {
+            var matchCount = 0
+            var startIndex = 0
+            var matchPosition = 0
+
+            while (true) {
+                val index = content.indexOf(search, startIndex, ignoreCase = true)
+                if (index == -1) break
+
+                if (matchCount == currentSearchIndex) {
+                    matchPosition = index
+                    break
+                }
+                matchCount++
+                startIndex = index + 1
+            }
+
+            val layoutResult = textLayoutResult!!
+            val line = layoutResult.getLineForOffset(matchPosition)
+            val lineTop = layoutResult.getLineTop(line).toInt()
+
+            scrollState.animateScrollTo(lineTop)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -1037,55 +1085,106 @@ fun RequestDataScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .fillMaxSize(),
         ) {
             if (showSearch) {
-                OutlinedTextField(
-                    value = search,
-                    onValueChange = { search = it },
-                    placeholder = { Text("Search...") },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                )
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = search,
+                        onValueChange = {
+                            search = it
+                            currentSearchIndex = 0
+                        },
+                        placeholder = { Text("Search...") },
+                        modifier = Modifier.weight(1f),
+                    )
+
+                    Text(
+                        text = if (matches > 0) "${currentSearchIndex + 1}/$matches" else "0/0",
+                        fontSize = 12.sp,
+                        modifier = Modifier.width(40.dp),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Button(
+                        onClick = {
+                            if (matches > 0) {
+                                currentSearchIndex = (currentSearchIndex - 1 + matches) % matches
+                            }
+                        },
+                        enabled = search.isNotBlank() && matches > 0,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Text("▲", color = Color.White)
+                    }
+
+                    Button(
+                        onClick = {
+                            if (matches > 0) {
+                                currentSearchIndex = (currentSearchIndex + 1) % matches
+                            }
+                        },
+                        enabled = search.isNotBlank() && matches > 0,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Text("▼", color = Color.White)
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            SelectionContainer {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    item {
-                        Text(
-                            text = highlightText(content, search),
-                            fontSize = 14.sp,
-                        )
-                    }
-                }
+            SelectionContainer(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = highlightText(content, search, currentSearchIndex),
+                    fontSize = 14.sp,
+                    onTextLayout = { textLayoutResult = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                )
             }
         }
     }
 }
 
+fun highlightText(text: String, search: String, currentIndex: Int): AnnotatedString {
+    if (search.isBlank()) return AnnotatedString(text)
 
-fun highlightText(
-    fullText: String,
-    query: String,
-): androidx.compose.ui.text.AnnotatedString {
-    if (query.isBlank()) {
-        return buildAnnotatedString { append(fullText) }
-    }
+    val builder = AnnotatedString.Builder(text)
+    var matchCount = 0
+    var startIndex = 0
 
-    return buildAnnotatedString {
-        var startIdx = 0
-        while (startIdx < fullText.length) {
-            val index = fullText.indexOf(query, startIdx, ignoreCase = true)
-            if (index == -1) {
-                append(fullText.substring(startIdx))
-                break
-            }
+    while (true) {
+        val index = text.indexOf(search, startIndex, ignoreCase = true)
+        if (index == -1) break
 
-            append(fullText.substring(startIdx, index))
-            withStyle(style = SpanStyle(background = Color.Yellow)) {
-                append(fullText.substring(index, index + query.length))
-            }
-            startIdx = index + query.length
+        if (matchCount == currentIndex) {
+            builder.addStyle(
+                SpanStyle(background = Color(0xFFFF893B), color = Color.Black),
+                index,
+                index + search.length
+            )
+        } else {
+            builder.addStyle(
+                SpanStyle(background = Color(0xFFFFEB3B)),
+                index,
+                index + search.length
+            )
         }
+        matchCount++
+        startIndex = index + 1
     }
+
+    return builder.toAnnotatedString()
 }
