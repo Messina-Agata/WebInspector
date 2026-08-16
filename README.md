@@ -48,7 +48,7 @@
 
     - **Response**: Full response body viewer with text selection, copy, and search capabilities.
 
-      <img width="348" height="754" alt="image" src="https://github.com/user-attachments/assets/64a5dea8-c6c0-4e8e-8d76-f8af7da59d6f" />
+      <img width="348" height="754" alt="image" src="https://github.com/user-attachments/assets/47726ff1-e1ba-4b76-9642-caf841af7d84" />
 
 
 ## ⚖️ Licenses
